@@ -6,9 +6,11 @@ import unittest
 from datetime import datetime
 import models
 import json
+import os
 
 Place = models.place.Place
 BaseModel = models.base_model.BaseModel
+storage_type = os.environ.get('HBNB_TYPE_STORAGE')
 
 
 class TestPlaceDocs(unittest.TestCase):
@@ -33,12 +35,6 @@ class TestPlaceDocs(unittest.TestCase):
         actual = Place.__doc__
         self.assertEqual(expected, actual)
 
-    def test_doc_init(self):
-        """... documentation for init function"""
-        expected = 'instantiates a new place'
-        actual = Place.__init__.__doc__
-        self.assertEqual(expected, actual)
-
 
 class TestPlaceInstances(unittest.TestCase):
     """testing for class instances"""
@@ -58,6 +54,7 @@ class TestPlaceInstances(unittest.TestCase):
         """... checks if Place is properly instantiated"""
         self.assertIsInstance(self.place, Place)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_to_string(self):
         """... checks if BaseModel is properly casted to string"""
         my_str = str(self.place)
@@ -68,6 +65,7 @@ class TestPlaceInstances(unittest.TestCase):
                 actual += 1
         self.assertTrue(3 == actual)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_instantiation_no_updated(self):
         """... should not have updated attribute"""
         my_str = str(self.place)
@@ -76,6 +74,7 @@ class TestPlaceInstances(unittest.TestCase):
             actual += 1
         self.assertTrue(0 == actual)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_updated_at(self):
         """... save function should add updated_at attribute"""
         self.place.save()
@@ -83,6 +82,7 @@ class TestPlaceInstances(unittest.TestCase):
         expected = type(datetime.now())
         self.assertEqual(expected, actual)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_to_json(self):
         """... to_json should return serializable dict object"""
         self.place_json = self.place.to_json()
@@ -93,6 +93,7 @@ class TestPlaceInstances(unittest.TestCase):
             actual = 0
         self.assertTrue(1 == actual)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_json_class(self):
         """... to_json should include class key with value Place"""
         self.place_json = self.place.to_json()
@@ -102,8 +103,8 @@ class TestPlaceInstances(unittest.TestCase):
         expected = 'Place'
         self.assertEqual(expected, actual)
 
-    def test_email_attribute(self):
-        """... add email attribute"""
+    def test_guest_attribute(self):
+        """... add guest attribute"""
         self.place.max_guest = 3
         if hasattr(self.place, 'max_guest'):
             actual = self.place.max_guest

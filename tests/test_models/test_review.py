@@ -6,9 +6,11 @@ import unittest
 from datetime import datetime
 import models
 import json
+import os
 
 Review = models.review.Review
 BaseModel = models.base_model.BaseModel
+storage_type = os.environ.get('HBNB_TYPE_STORAGE')
 
 
 class TestReviewDocs(unittest.TestCase):
@@ -33,12 +35,6 @@ class TestReviewDocs(unittest.TestCase):
         actual = Review.__doc__
         self.assertEqual(expected, actual)
 
-    def test_doc_init(self):
-        """... documentation for init function"""
-        expected = 'instantiates a new review'
-        actual = Review.__init__.__doc__
-        self.assertEqual(expected, actual)
-
 
 class TestReviewInstances(unittest.TestCase):
     """testing for class instances"""
@@ -58,6 +54,7 @@ class TestReviewInstances(unittest.TestCase):
         """... checks if Review is properly instantiated"""
         self.assertIsInstance(self.review, Review)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_to_string(self):
         """... checks if BaseModel is properly casted to string"""
         my_str = str(self.review)
@@ -68,6 +65,7 @@ class TestReviewInstances(unittest.TestCase):
                 actual += 1
         self.assertTrue(3 == actual)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_instantiation_no_updated(self):
         """... should not have updated attribute"""
         my_str = str(self.review)
@@ -76,6 +74,7 @@ class TestReviewInstances(unittest.TestCase):
             actual += 1
         self.assertTrue(0 == actual)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_updated_at(self):
         """... save function should add updated_at attribute"""
         self.review.save()
@@ -83,6 +82,7 @@ class TestReviewInstances(unittest.TestCase):
         expected = type(datetime.now())
         self.assertEqual(expected, actual)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_to_json(self):
         """... to_json should return serializable dict object"""
         self.review_json = self.review.to_json()
@@ -93,6 +93,7 @@ class TestReviewInstances(unittest.TestCase):
             actual = 0
         self.assertTrue(1 == actual)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_json_class(self):
         """... to_json should include class key with value Review"""
         self.review_json = self.review.to_json()
@@ -102,8 +103,8 @@ class TestReviewInstances(unittest.TestCase):
         expected = 'Review'
         self.assertEqual(expected, actual)
 
-    def test_email_attribute(self):
-        """... add email attribute"""
+    def test_review_attribute(self):
+        """... add review attribute"""
         self.review.text = "This place smells"
         if hasattr(self.review, 'text'):
             actual = self.review.text

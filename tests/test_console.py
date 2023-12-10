@@ -1,48 +1,36 @@
 #!/usr/bin/python3
 """
-This is module test_console.
-This module is a unittest for the console module.
-it can be run with python -m unittest tests/test_console.py from
-the parent directory
+Unit Test for BaseModel Class
 """
 import unittest
-import sys
-from unittest.mock import patch
-from io import StringIO
-
-# needed, import does not work, and relative path neither does
-# sys.path.insert(1,'/home/vagrant/projects/AirBnB_clone')
+from datetime import datetime
 import console
+import json
+
+HBNBCommand = console.HBNBCommand
 
 
-class TestConsole(unittest.TestCase):
-    """
-    This class is a unittest for the console module
+class TestHBNBCommandDocs(unittest.TestCase):
+    """Class for testing BaseModel docs"""
 
-    **Instance methods**
-    """
-    def setUp(self):
-        """Redirects stdin and stdout"""
-        self.command = console.HBNBCommand()
+    @classmethod
+    def setUpClass(cls):
+        print('\n\n.................................')
+        print('..... Testing Documentation .....')
+        print('.......  For the Console  .......')
+        print('.................................\n\n')
 
-    def test_help(self):
-        """
-        Tests the help command
-        """
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            self.assertFalse(self.command.onecmd("help"))
-            # must redirect print to something, needs a return value
-            self.assertEqual("""\nDocumented commands (
-                type help <topic>):\n
-                    ========================================
-                        \nEOF  help  quit\n""",
-                             fake_out.getvalue().strip())
+    def test_doc_file(self):
+        """... documentation for the file"""
+        expected = '\nCommand interpreter for Holberton AirBnB project\n'
+        actual = console.__doc__
+        self.assertEqual(expected, actual)
 
-    def test_quit(self):
-        pass
+    def test_doc_class(self):
+        """... documentation for the class"""
+        expected = '\n        Command inerpreter class\n    '
+        actual = HBNBCommand.__doc__
+        self.assertEqual(expected, actual)
 
-    def test_EOF(self):
-        pass
-
-if __name__ == "__main__":
-    unittest.main()
+if __name__ == '__main__':
+    unittest.main

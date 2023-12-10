@@ -1,66 +1,96 @@
 #!/usr/bin/python3
 """
-This is the BaseModel module
-It contains one class: BaseModel
-It contains the following functions:
-    def to_json(self)
+BaseModel Class of Models Module
 """
+
+import os
 import json
-import uuid
-from datetime import datetime
 import models
-time_format = "%Y-%m-%dT%H:%M:%S.%f"
+from uuid import uuid4, UUID
+from datetime import datetime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Float, DateTime
+
+storage_type = os.environ.get('HBNB_TYPE_STORAGE')
+
+"""
+    Creates instance of Base if storage type is a database
+    If not database storage, uses class Base
+"""
+if storage_type == 'db':
+    Base = declarative_base()
+else:
+    class Base:
+        pass
 
 
 class BaseModel:
-    """BaseModel class for other classes
     """
+        attributes and functions for BaseModel class
+    """
+
+    if storage_type == 'db':
+        id = Column(String(60), nullable=False, primary_key=True)
+        created_at = Column(DateTime, nullable=False,
+                            default=datetime.utcnow())
+        updated_at = Column(DateTime, nullable=False,
+                            default=datetime.utcnow())
+
     def __init__(self, *args, **kwargs):
-        """init BaseModel class
-        public instance attributes
-        id: string - assign with an uuid when an instance is created
-        created_at: datetime - assign with the current
-        datetime when an instance is created
-        updated_at:datetime
-        """
+        """instantiation of new BaseModel Class"""
+        self.id = str(uuid4())
+        self.created_at = datetime.now()
         if kwargs:
-            self.__dict__ = kwargs
-            if "created_at" in kwargs:
-                self.created_at = datetime.strptime(kwargs.get("created_at"),
-                                                    time_format)
-            if "updated_at" in kwargs:
-                self.updated_at = datetime.strptime(kwargs.get("updated_at"),
-                                                    time_format)
-        else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            models.storage.new(self)
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+
+    def __is_serializable(self, obj_v):
+        """
+            private: checks if object is serializable
+        """
+        try:
+            obj_to_str = json.dumps(obj_v)
+            return obj_to_str is not None and isinstance(obj_to_str, str)
+        except:
+            return False
+
+    def bm_update(self, name, value):
+        """
+            updates the basemodel and sets the correct attributes
+        """
+        setattr(self, name, value)
+        if storage_type != 'db':
+            self.save()
 
     def save(self):
-        """updates the public instance attribute updated_at
-        with the current datetime
-        """
-        self.updated_at = datetime.now()
+        """updates attribute updated_at to current time"""
+        if storage_type != 'db':
+            self.updated_at = datetime.now()
+        models.storage.new(self)
         models.storage.save()
 
     def to_json(self):
-        """returns a dictionary containing all
-        keys/values of __dict__ of the instance
-        + the class name in the key __class__.
-        This method will be the first piece of the
-        serialization/deserialization process.
-        """
-        model_dict = self.__dict__.copy()
-        model_dict["__class__"] = type(self).__name__
-        for key, value in model_dict.items():
-            if isinstance(value, datetime):
-                model_dict[key] = value.strftime(time_format)
-        return model_dict
+        """returns json representation of self"""
+        bm_dict = {}
+        for key, value in (self.__dict__).items():
+            if (self.__is_serializable(value)):
+                bm_dict[key] = value
+            else:
+                bm_dict[key] = str(value)
+        bm_dict['__class__'] = type(self).__name__
+        if '_sa_instance_state' in bm_dict:
+            bm_dict.pop('_sa_instance_state')
+        if storage_type == "db" and 'password' in bm_dict:
+            bm_dict.pop('password')
+        return bm_dict
 
     def __str__(self):
-        """Print BaseModel info
-        private method
-        __str__: should print: [<class name>] (<self.id>) <self.__dict__>
+        """returns string type representation of object instance"""
+        class_name = type(self).__name__
+        return '[{}] ({}) {}'.format(class_name, self.id, self.__dict__)
+
+    def delete(self):
         """
-        return ("[{0}] ({1}) {2}".format(self.__class__.__name__,
-                                         self.id, self.__dict__))
+            deletes current instance from storage
+        """
+        self.delete()

@@ -1,20 +1,20 @@
 #!/usr/bin/python3
 """
-Module that creates amenity
+Amenity Class from Models Module
 """
+import os
+from models.base_model import BaseModel, Base
+from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy.orm import backref
+storage_type = os.environ.get('HBNB_TYPE_STORAGE')
 
-from models.base_model import BaseModel
 
-
-class Amenity(BaseModel):
-    """class Amenity that inherits from BaseModel
-    public class attribute:
-    name: string - empty string
-    """
-
-    name = ""
-
-    def __init__(self, *args, **kwargs):
-        """create new amenity
-        """
-        super().__init__(self, *args, **kwargs)
+class Amenity(BaseModel, Base):
+    """Amenity class handles all application amenities"""
+    if storage_type == "db":
+        __tablename__ = 'amenities'
+        name = Column(String(128), nullable=False)
+        place_amenities = relationship("Place", secondary="place_amenity")
+    else:
+        name = ''

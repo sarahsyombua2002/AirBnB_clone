@@ -1,22 +1,39 @@
 #!/usr/bin/python3
 """
-Module that creates city
+City Class from Models Module
 """
+import os
+from models.base_model import BaseModel, Base
+from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
+import models
+storage_type = os.environ.get('HBNB_TYPE_STORAGE')
 
-from models.base_model import BaseModel
 
+class City(BaseModel, Base):
+    """City class handles all application cities"""
+    if storage_type == "db":
+        __tablename__ = 'cities'
+        name = Column(String(128), nullable=False)
+        state_id = Column(String(60), ForeignKey('states.id'), nullable=False)
+        places = relationship('Place', backref='cities', cascade='delete')
+    else:
+        state_id = ''
+        name = ''
 
-class City(BaseModel):
-    """class City that inherits from BaseModel
-    public class attributes:
-    state_id: string - empty string
-    name: string - empty string
-    """
+    if storage_type != 'db':
+        @property
+        def places(self):
+            """
+            getter for places
+            :return: list of places in that city
+            """
+            all_places = models.storage.all("Place")
 
-    state_id = ""
-    name = ""
+            result = []
 
-    def __init__(self, *args, **kwargs):
-        """create new city
-        """
-        super().__init__(self, *args, **kwargs)
+            for obj in all_places.values():
+                if str(obj.city_id) == str(self.id):
+                    result.append(obj)
+
+            return result

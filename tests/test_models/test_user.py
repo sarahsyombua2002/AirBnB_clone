@@ -6,9 +6,11 @@ import unittest
 from datetime import datetime
 import models
 import json
+import os
 
 User = models.user.User
 BaseModel = models.base_model.BaseModel
+storage_type = os.environ.get('HBNB_TYPE_STORAGE')
 
 
 class TestUserDocs(unittest.TestCase):
@@ -33,12 +35,6 @@ class TestUserDocs(unittest.TestCase):
         actual = User.__doc__
         self.assertEqual(expected, actual)
 
-    def test_doc_init(self):
-        """... documentation for init function"""
-        expected = 'instantiates a new user'
-        actual = User.__init__.__doc__
-        self.assertEqual(expected, actual)
-
 
 class TestUserInstances(unittest.TestCase):
     """testing for class instances"""
@@ -58,6 +54,7 @@ class TestUserInstances(unittest.TestCase):
         """... checks if User is properly instantiated"""
         self.assertIsInstance(self.user, User)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_to_string(self):
         """... checks if BaseModel is properly casted to string"""
         my_str = str(self.user)
@@ -68,6 +65,7 @@ class TestUserInstances(unittest.TestCase):
                 actual += 1
         self.assertTrue(3 == actual)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_instantiation_no_updated(self):
         """... should not have updated attribute"""
         self.user = User()
@@ -77,6 +75,7 @@ class TestUserInstances(unittest.TestCase):
             actual += 1
         self.assertTrue(0 == actual)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_updated_at(self):
         """... save function should add updated_at attribute"""
         self.user.save()
@@ -84,6 +83,7 @@ class TestUserInstances(unittest.TestCase):
         expected = type(datetime.now())
         self.assertEqual(expected, actual)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_to_json(self):
         """... to_json should return serializable dict object"""
         self.user_json = self.user.to_json()
@@ -94,6 +94,7 @@ class TestUserInstances(unittest.TestCase):
             actual = 0
         self.assertTrue(1 == actual)
 
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
     def test_json_class(self):
         """... to_json should include class key with value User"""
         self.user_json = self.user.to_json()
